@@ -1,0 +1,184 @@
+Date: Auguest 11, 2019, 14:31PM
+
+(fenghan) yi@yi:~/Desktop/fenghan$ python refactor_preprocess.py 
+Using TensorFlow backend.
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:516: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version 
+of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:517: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version 
+of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:518: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version 
+of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:519: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version 
+of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:520: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version 
+of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/framework/dtypes.py:525: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:541: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:542: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:543: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:544: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:545: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorboard/compat/tensorflow_stub/dtypes.py:550: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+WORD2VEC POINTS: 470260
+Parsing: ./clean_summaries0209.csv
+{'text': 0, 'Hospital.Admission.ID': 1, 'subject.id': 2, 'chart.time': 3, 'cohort': 4, 'Obesity': 5, 'Non.Adherence': 6, 'Developmental.Delay.Retardation': 7, 'Advanced.Heart.Disease': 8, 'Advanced.Lung.Disease': 9, 'Schizophrenia.and.other.Psychiatric.Disorders': 10, 'Alcohol.Abuse': 11, 'Other.Substance.Abuse': 12, 'Chronic.Pain.Fibromyalgia': 13, 'Chronic.Neurological.Dystrophies': 14, 'Advanced.Cancer': 15, 'Depression': 16, 'Dementia': 17, 'Unsure': 18}
+FOUND 1610 DATA POINTS
+CONVERTING ROW 0
+CONVERTING ROW 100
+CONVERTING ROW 200
+CONVERTING ROW 300
+CONVERTING ROW 400
+CONVERTING ROW 500
+CONVERTING ROW 600
+CONVERTING ROW 700
+CONVERTING ROW 800
+CONVERTING ROW 900
+CONVERTING ROW 1000
+CONVERTING ROW 1100
+CONVERTING ROW 1200
+CONVERTING ROW 1300
+CONVERTING ROW 1400
+CONVERTING ROW 1500
+CONVERTING ROW 1600
+MAXIMUM TEXT LENGTH IS 5572
+WORD AMOUNTS IS 48849
+VOCAB SIZE 48848
+4852 UNKNOWN WORDS
+WARNING: Logging before flag parsing goes to stderr.
+W0811 13:51:58.658915 139842483275584 deprecation_wrapper.py:119] From /home/yi/Desktop/fenghan/model.py:25: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+W0811 13:51:58.661465 139842483275584 deprecation_wrapper.py:119] From /home/yi/Desktop/fenghan/model.py:35: The name tf.get_variable is deprecated. Please use tf.compat.v1.get_variable instead.
+
+W0811 13:51:58.733659 139842483275584 deprecation.py:323] From /home/yi/Desktop/fenghan/model.py:51: LSTMCell.__init__ (from tensorflow.python.ops.rnn_cell_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This class is equivalent as tf.keras.layers.LSTMCell, and will be replaced by that in Tensorflow 2.0.
+W0811 13:51:58.751153 139842483275584 deprecation.py:323] From /home/yi/Desktop/fenghan/model.py:89: dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.RNN(cell)`, which is equivalent to this API
+W0811 13:51:58.829435 139842483275584 deprecation.py:506] From /home/yi/anaconda3/envs/fenghan/lib/python3.7/site-packages/tensorflow/python/ops/rnn_cell_impl.py:961: calling Zeros.__init__ (from tensorflow.python.ops.init_ops) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Call initializer instance with the dtype argument instead of passing it to the constructor
+W0811 13:51:59.512382 139842483275584 deprecation_wrapper.py:119] From /home/yi/Desktop/fenghan/model.py:94: The name tf.truncated_normal is deprecated. Please use tf.random.truncated_normal instead.
+
+W0811 13:51:59.557379 139842483275584 deprecation_wrapper.py:119] From /home/yi/Desktop/fenghan/model.py:138: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+W0811 13:51:59.881990 139842483275584 deprecation_wrapper.py:119] From /home/yi/Desktop/fenghan/model.py:139: The name tf.train.Saver is deprecated. Please use tf.compat.v1.train.Saver instead.
+
+W0811 13:52:03.499936 139842483275584 deprecation_wrapper.py:119] From refactor_preprocess.py:206: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2019-08-11 13:52:03.500344: I tensorflow/core/platform/cpu_feature_guard.cc:145] This TensorFlow binary is optimized with Intel(R) MKL-DNN to use the following CPU instructions in performance critical operations:  SSE4.1 SSE4.2 AVX AVX2 FMA
+To enable them in non-MKL-DNN operations, rebuild TensorFlow with the appropriate compiler flags.
+2019-08-11 13:52:03.522003: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2592000000 Hz
+2019-08-11 13:52:03.522454: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55b9458f2170 executing computations on platform Host. Devices:
+2019-08-11 13:52:03.522474: I tensorflow/compiler/xla/service/service.cc:175]   StreamExecutor device (0): <undefined>, <undefined>
+OMP: Info #212: KMP_AFFINITY: decoding x2APIC ids.
+OMP: Info #210: KMP_AFFINITY: Affinity capable, using global cpuid leaf 11 info
+OMP: Info #154: KMP_AFFINITY: Initial OS proc set respected: 0-7
+OMP: Info #156: KMP_AFFINITY: 8 available OS procs
+OMP: Info #157: KMP_AFFINITY: Uniform topology
+OMP: Info #179: KMP_AFFINITY: 1 packages x 4 cores/pkg x 2 threads/core (4 total cores)
+OMP: Info #214: KMP_AFFINITY: OS proc to physical thread map:
+OMP: Info #171: KMP_AFFINITY: OS proc 0 maps to package 0 core 0 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 4 maps to package 0 core 0 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 1 maps to package 0 core 1 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 5 maps to package 0 core 1 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 2 maps to package 0 core 2 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 6 maps to package 0 core 2 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 3 maps to package 0 core 3 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 7 maps to package 0 core 3 thread 1 
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17547 thread 0 bound to OS proc set 0
+2019-08-11 13:52:03.526611: I tensorflow/core/common_runtime/process_util.cc:115] Creating new thread pool with default inter op setting: 2. Tune using inter_op_parallelism_threads for best performance.
+W0811 13:52:03.526916 139842483275584 deprecation_wrapper.py:119] From refactor_preprocess.py:207: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+2019-08-11 13:52:03.756537: W tensorflow/compiler/jit/mark_for_compilation_pass.cc:1412] (One-time warning): Not using XLA:CPU for cluster because envvar TF_XLA_FLAGS=--tf_xla_cpu_global_jit was not set.  If you want XLA:CPU, either set that envvar, or use experimental_jit_scope to enable XLA:CPU.  To confirm that XLA is active, pass --vmodule=xla_compilation_cache=1 (as a proper command-line flag, not via TF_XLA_FLAGS) or set the envvar XLA_FLAGS=--xla_hlo_profile.
+--------BATCH_NUM------------------------Epoch :  0 ---------------------------------------
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17595 thread 1 bound to OS proc set 1
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17597 thread 2 bound to OS proc set 2
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17599 thread 4 bound to OS proc set 4
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17598 thread 3 bound to OS proc set 3
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17601 thread 6 bound to OS proc set 6
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17602 thread 7 bound to OS proc set 7
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17600 thread 5 bound to OS proc set 5
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17603 thread 8 bound to OS proc set 0
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17596 thread 9 bound to OS proc set 1
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17604 thread 10 bound to OS proc set 2
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17605 thread 11 bound to OS proc set 3
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17606 thread 12 bound to OS proc set 4
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17607 thread 13 bound to OS proc set 5
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17608 thread 14 bound to OS proc set 6
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17610 thread 16 bound to OS proc set 0
+OMP: Info #250: KMP_AFFINITY: pid 17547 tid 17609 thread 15 bound to OS proc set 7
+STEP 1 of 23 Loss: 0.69057965
+STEP 2 of 23 Loss: 0.6871886
+STEP 3 of 23 Loss: 0.68279296
+STEP 4 of 23 Loss: 0.6794155
+STEP 5 of 23 Loss: 0.67398334
+STEP 6 of 23 Loss: 0.67261904
+STEP 7 of 23 Loss: 0.67495286
+STEP 8 of 23 Loss: 0.6803218
+STEP 9 of 23 Loss: 0.6749851
+STEP 10 of 23 Loss: 0.673534
+STEP 11 of 23 Loss: 0.67268527
+STEP 12 of 23 Loss: 0.6754272
+STEP 13 of 23 Loss: 0.6731246
+STEP 14 of 23 Loss: 0.67365533
+STEP 15 of 23 Loss: 0.6738676
+STEP 16 of 23 Loss: 0.6759776
+STEP 17 of 23 Loss: 0.6734242
+STEP 18 of 23 Loss: 0.67303425
+STEP 19 of 23 Loss: 0.6727139
+STEP 20 of 23 Loss: 0.675493
+STEP 21 of 23 Loss: 0.6726078
+STEP 22 of 23 Loss: 0.6750953
+Epoch  0  of  2  loss: 0.6762491
+--------BATCH_NUM------------------------Epoch :  1 ---------------------------------------
+STEP 1 of 23 Loss: 0.67283285
+STEP 2 of 23 Loss: 0.67275035
+STEP 3 of 23 Loss: 0.6726527
+STEP 4 of 23 Loss: 0.67563426
+STEP 5 of 23 Loss: 0.672572
+STEP 6 of 23 Loss: 0.6726191
+STEP 7 of 23 Loss: 0.6726873
+STEP 8 of 23 Loss: 0.6754271
+STEP 9 of 23 Loss: 0.6727843
+STEP 10 of 23 Loss: 0.6727813
+STEP 11 of 23 Loss: 0.6727356
+STEP 12 of 23 Loss: 0.67542017
+STEP 13 of 23 Loss: 0.6726229
+STEP 14 of 23 Loss: 0.67258525
+STEP 15 of 23 Loss: 0.67256844
+STEP 16 of 23 Loss: 0.67558897
+STEP 17 of 23 Loss: 0.67258334
+STEP 18 of 23 Loss: 0.67258954
+STEP 19 of 23 Loss: 0.67259
+STEP 20 of 23 Loss: 0.6756318
+STEP 21 of 23 Loss: 0.67257106
+STEP 22 of 23 Loss: 0.67472535
+Epoch  1  of  2  loss: 0.673407
+Testing Accuracy: [ True False  True  True False  True  True  True False  True  True False
+  True  True  True False  True  True False  True  True  True False  True
+  True False  True  True  True False  True  True False  True  True  True
+ False  True  True False  True  True  True False  True  True False  True
+  True  True False  True  True False  True  True  True False  True  True
+ False  True  True  True False  True  True False  True  True  True False
+  True  True False  True  True  True False  True  True False  True  True
+  True False  True  True False  True  True  True False  True  True False
+  True  True  True False  True  True False  True  True  True False  True
+  True False  True  True  True False  True  True False  True  True  True
+ False  True  True False  True  True  True False  True  True False  True
+  True  True False  True  True False  True  True  True False  True  True
+ False  True  True  True False  True  True False  True  True  True False
+  True  True False  True  True]
+(fenghan) yi@yi:~/Desktop/fenghan$ 
