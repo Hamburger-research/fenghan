@@ -25,7 +25,7 @@ import tensorflow as tf
 # PROJECTION_NUM = 64
 # OUTPUT_KEEP_PROB = 0.5
 # LEARNING_RATE = 0.001
-EPOCHS_NUM = 2
+# EPOCHS_NUM = 10
 # args = {}
 
 def preprocess(args, emb_size):
@@ -124,7 +124,7 @@ def preprocess(args, emb_size):
     return lbl, targets, ids, subj, time, embed
 
 
-def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, outputs,
+def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs,
                         softmax_w, softmax_b, embedding, prediction_prob):
     ################################### CROSS VALIDATION ###################################
     lbl_ = np.array(lbl, dtype=int)
@@ -209,9 +209,10 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
            
         
         BATCH_NUM = int(math.ceil(len(lbl_train[0]) / BANTCH_SIZE))
+        EPOCHS_NUM = 1
 
         j = 3
-        for k in range(EPOCHS_NUM): 
+        for k in range(EPOCHS_NUM):  
             
             loss_per_epoch = []
             print("--------BATCH_NUM------------------------Epoch : ",k,"---------------------------------------")    
@@ -230,20 +231,21 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
                 _, l, a = sesh.run([optimizer, loss, accuracy], feed_dict={ input_data:x_batch, target:y_batch})
                    
                 if i>0:
-                       #print("STEP",i,"of",BATCH_NUM, "Loss:", l, "ACC:", a, "AUC:", u)
-                    # print("STEP",i,"of",BATCH_NUM, "Loss:", l)
-                    print("STEP",i,"of",BATCH_NUM, "Loss:", np.mean(l))
                     
+                       #print("STEP",i,"of",BATCH_NUM, "Loss:", l, "ACC:", a, "AUC:", u)
+                    #print("STEP",i,"of",BATCH_NUM, "Loss:", l)
                     loss_per_epoch.append(np.mean(l))
-
+                    print("STEP",i,"of",BATCH_NUM, "Loss:", np.mean(l))
                     prediction_print = prediction.eval(feed_dict = {input_data:x_batch}) 
-                    outputs_print = outputs[-1].eval(feed_dict = {input_data:x_batch}) 
+                    last_output_print = all_outputs[-1].eval(feed_dict = {input_data:x_batch}) 
+                    all_outputs_print = all_outputs.eval(feed_dict = {input_data:x_batch}) 
                     prediction_prob_print = prediction_prob.eval(feed_dict = {input_data:x_batch}) 
                     softmax_w_print = softmax_w.eval() 
                     softmax_b_print = softmax_b.eval() 
                     embedding_print = embedding.eval() 
-            
+                    
             print("Epoch ", k, " of ", EPOCHS_NUM, " loss:", np.mean(loss_per_epoch))
+                       
                
         x_batch_test = lbl_test[j]
         y_batch_test = lbl_test_target[j][:,DISEASE_ID]
@@ -251,7 +253,7 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
         y_batch_test=to_categorical(y_batch_test,num_classes=2,dtype='int64')
         print("Testing Accuracy:", sesh.run(accuracy, feed_dict={input_data: x_batch_test, target: y_batch_test}))
         
-    return softmax_w_print, softmax_b_print, embedding_print, outputs_print, prediction_print, prediction_prob_print
+    return softmax_w_print, softmax_b_print, embedding_print, all_outputs_print, prediction_print, prediction_prob_print, last_output_print
 
 
 def main():
@@ -286,10 +288,10 @@ def main():
     lbl, targets, ids, subj, time, embed = preprocess(args, emb_size)
 
     # second step
-    BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, outputs, softmax_w, softmax_b, embedding ,prediction_prob = lstm_model(embed)
+    BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs, softmax_w, softmax_b, embedding ,prediction_prob = lstm_model(embed)
 
     # third step
-    softmax_w_print, softmax_b_print, embedding_print, output_print, prediction_print, prediction_prob_print  = cross_validation(lbl, targets, ids, subj, time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, outputs, softmax_w, softmax_b, embedding, prediction_prob)
+    softmax_w_print, softmax_b_print, embedding_print, all_outputs_print, prediction_print, prediction_prob_print, last_output_print = cross_validation(lbl, targets, ids, subj, time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs, softmax_w, softmax_b, embedding, prediction_prob)
 
     
     # save_path = saver.save(sesh,'/Users/han/Desktop/deep learning/model/model.ckpt')
