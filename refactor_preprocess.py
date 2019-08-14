@@ -124,8 +124,8 @@ def preprocess(args, emb_size):
     return lbl, targets, ids, subj, time, embed
 
 
-def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs,
-                        softmax_w, softmax_b, embedding, prediction_prob):
+def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, loss, accuracy, input_data, target, prediction, all_outputs,
+                        w, b, embedding, predictions, dropout_keep_prob):
     ################################### CROSS VALIDATION ###################################
     lbl_ = np.array(lbl, dtype=int)
     targets_ = np.array(targets, dtype=int)
@@ -195,21 +195,28 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
 
     for i in range(0,fold):
         lbl_test.append(lbl_biassam[i*foldidx:foldidx*(i+1)][:])
-        lbl_train.append(np.concatenate((lbl_biassam[:i*foldidx][:],lbl_biassam[foldidx*(i+1):][:])))
         lbl_test_target.append(lbl_biastar[i*foldidx:foldidx*(i+1)][:])
+        
+        lbl_train.append(np.concatenate((lbl_biassam[:i*foldidx][:],lbl_biassam[foldidx*(i+1):][:])))
         lbl_train_target.append(np.concatenate((lbl_biastar[:i*foldidx][:],lbl_biastar[foldidx*(i+1):][:])))
 
     x_batch = list()
     y_batch = list()
     x_batch_test = list()
     y_batch_test = list()
-    with tf.Session() as sesh:
-        init =tf.group(tf.global_variables_initializer(), tf.local_variables_initializer()) 
-        sesh.run(init)
-           
+    
+    BATCH_NUM = int(math.ceil(len(lbl_train[0]) / BANTCH_SIZE))
+    EPOCHS_NUM = 3
+    DROPOUT_KEEP_PROB = 0.5
+    LEARNING_RATE = 0.001
         
-        BATCH_NUM = int(math.ceil(len(lbl_train[0]) / BANTCH_SIZE))
-        EPOCHS_NUM = 1
+    with tf.Session() as sesh:
+        #init =tf.group(tf.global_variables_initializer(), tf.local_variables_initializer()) 
+        global_step = tf.Variable(0, name="global_step", trainable=False)
+        optimizer = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss, global_step=global_step)
+            
+        sesh.run(tf.global_variables_initializer())
+           
 
         j = 3
         for k in range(EPOCHS_NUM):  
@@ -218,31 +225,29 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
             print("--------BATCH_NUM------------------------Epoch : ",k,"---------------------------------------")    
             for i in range(BATCH_NUM):  # 0, 1, 2, .... 22
                 if i <= BATCH_NUM-1:
-                     x_batch = lbl_train[j][i * BANTCH_SIZE : i *BANTCH_SIZE + BANTCH_SIZE]
-                     y_batch = lbl_train_target[j][i * BANTCH_SIZE : i *BANTCH_SIZE + BANTCH_SIZE][:,DISEASE_ID]  # y_batch只存储当前病症的label，所以不是64X15，而是(64,)
-                     y_batch = np.reshape(y_batch, (-1, 1))
+                     x_batch = lbl_train[j][i * BANTCH_SIZE : (i *BANTCH_SIZE + BANTCH_SIZE)]
+                     y_batch = lbl_train_target[j][i * BANTCH_SIZE : (i *BANTCH_SIZE + BANTCH_SIZE)][:,DISEASE_ID]  # y_batch只存储当前病症的label，所以不是64X15，而是(64,)
+                     #y_batch = np.reshape(y_batch, (-1, 1))
                      y_batch=to_categorical(y_batch,num_classes=2,dtype='int64')
                 else:
-                    x_batch = lbl_train[j][i * BANTCH_SIZE :]
-                    y_batch = lbl_train_target[j][i * BANTCH_SIZE :][:,DISEASE_ID]
-                    y_batch = np.reshape(y_batch, (-1, 1))
-                    y_batch=to_categorical(y_batch,num_classes=2,dtype='int64')
+                     x_batch = lbl_train[j][i * BANTCH_SIZE :]
+                     y_batch = lbl_train_target[j][i * BANTCH_SIZE :][:,DISEASE_ID]
+                     #y_batch = np.reshape(y_batch, (-1, 1))
+                     y_batch=to_categorical(y_batch,num_classes=2,dtype='int64')
             
-                _, l, a = sesh.run([optimizer, loss, accuracy], feed_dict={ input_data:x_batch, target:y_batch})
+                _, s, l, a = sesh.run([optimizer, global_step, loss, accuracy], feed_dict={ input_data:x_batch, target:y_batch, dropout_keep_prob: 0.5 })
                    
-                if i>0:
-                    
-                       #print("STEP",i,"of",BATCH_NUM, "Loss:", l, "ACC:", a, "AUC:", u)
-                    #print("STEP",i,"of",BATCH_NUM, "Loss:", l)
+                if i>=0:
                     loss_per_epoch.append(np.mean(l))
                     print("STEP",i,"of",BATCH_NUM, "Loss:", np.mean(l))
                     prediction_print = prediction.eval(feed_dict = {input_data:x_batch}) 
                     last_output_print = all_outputs[-1].eval(feed_dict = {input_data:x_batch}) 
                     all_outputs_print = all_outputs.eval(feed_dict = {input_data:x_batch}) 
-                    prediction_prob_print = prediction_prob.eval(feed_dict = {input_data:x_batch}) 
-                    softmax_w_print = softmax_w.eval() 
-                    softmax_b_print = softmax_b.eval() 
+                    predictions_print = predictions.eval(feed_dict = {input_data:x_batch}) 
+                    w_print = w.eval() 
+                    b_print = b.eval() 
                     embedding_print = embedding.eval() 
+                    
                     
             print("Epoch ", k, " of ", EPOCHS_NUM, " loss:", np.mean(loss_per_epoch))
                        
@@ -253,7 +258,7 @@ def cross_validation(lbl, targets, ids, subj,time, BANTCH_SIZE, optimizer, loss,
         y_batch_test=to_categorical(y_batch_test,num_classes=2,dtype='int64')
         print("Testing Accuracy:", sesh.run(accuracy, feed_dict={input_data: x_batch_test, target: y_batch_test}))
         
-    return softmax_w_print, softmax_b_print, embedding_print, all_outputs_print, prediction_print, prediction_prob_print, last_output_print
+    return w_print, b_print, embedding_print, all_outputs_print, prediction_print, predictions_print, last_output_print, x_batch, y_batch, lbl_resample, lbl_resample_target, lbl_test, lbl_train, lbl_test_target, lbl_train_target
 
 
 def main():
@@ -286,12 +291,14 @@ def main():
     # first step 
     # X_train, y_train, X_test, y_test = 
     lbl, targets, ids, subj, time, embed = preprocess(args, emb_size)
+    
+    embed[2]=np.zeros(50)
 
     # second step
-    BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs, softmax_w, softmax_b, embedding ,prediction_prob = lstm_model(embed)
+    BANTCH_SIZE, loss, accuracy, input_data, target, logits, all_outputs, w, b, embedding ,predictions, dropout_keep_prob = lstm_model(embed)
 
     # third step
-    softmax_w_print, softmax_b_print, embedding_print, all_outputs_print, prediction_print, prediction_prob_print, last_output_print = cross_validation(lbl, targets, ids, subj, time, BANTCH_SIZE, optimizer, loss, accuracy, input_data, target, prediction, all_outputs, softmax_w, softmax_b, embedding, prediction_prob)
+    w_print, b_print, embedding_print, all_outputs_print, logits_print, predictions_print, last_output_print, x_batch, y_batch, lbl_resample, lbl_resample_target, lbl_test, lbl_train, lbl_test_target, lbl_train_target = cross_validation(lbl, targets, ids, subj, time, BANTCH_SIZE, loss, accuracy, input_data, target, logits, all_outputs, w, b, embedding, predictions, dropout_keep_prob)
 
     
     # save_path = saver.save(sesh,'/Users/han/Desktop/deep learning/model/model.ckpt')
