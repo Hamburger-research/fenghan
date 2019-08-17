@@ -62,7 +62,7 @@ class LSTMClassifier(nn.Module):
 		seq_lengths.sort(reverse = True) 
 		seq_lengths = torch.LongTensor(seq_lengths)
 		print("seq_lengths list in decrease order is:", seq_lengths)
-		packed_input = pack_padded_sequence(input, seq_lengths, batch_first=False, enforce_sorted=False)
+		packed_input = pack_padded_sequence(input, seq_lengths.numpy(), batch_first=False, enforce_sorted=False)
         
 		#input = self.word_embeddings(packed_input) # embedded input of shape = (batch_size, num_sequences,  embedding_length)
 		
