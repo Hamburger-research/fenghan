@@ -85,26 +85,29 @@ def preprocess(args, emb_size, word2vec):
     # def split_input_id(data):
         #return data[:, :-3], data[:, -3], data[:, -2], data[:, -1]
 
-    # CONSTRUCT CORRECT EMBEDDING TABLE  
-    embed = np.random.uniform(-0.25, 0.25, (len(tokenizer.d), emb_size))   # 44844 X 50 ; tokenizer 存储了 44844 个 来自 inputs 中的有效单词
-    embed = np.row_stack((np.zeros(50),embed))
-    embed[2,:] = 0
+   # CONSTRUCT CORRECT EMBEDDING TABLE  
+    embed = np.random.uniform(-0.25, 0.25, (len(tokenizer.d) + 1, emb_size))   # 44848 X 50 ; tokenizer 存储了 44848 个 来自 inputs 中的有效单词
+    #embed = np.row_stack((np.zeros(50),embed))  #  for padding
     
-    embed[2,:] = 0
     
     unks = 0
-
+    
     for key, value in tokenizer.d.items():  #  字典 tokenizer.d:  '<unk>': 1, 'padding': 2, 'Admission': 3, 'Date': 4 ...
+
         try:
-            # -1 because of 1 indexing of word2idx (easier with torch)
-            embed[value - 1] = word2vec[key]   # 例如： embed[2] <-- word2vec['Admission'] 
-            #print(key)
-            #print (word2vec[key])
+             #-1 because of 1 indexing of word2idx (easier with torch)
+            embed[value] = word2vec[key]   # 例如： embed[2] <-- word2vec['Admission'] 
         except:
             unks += 1
             pass
-    print ("{} UNKNOWN WORDS".format(unks))  
+    print ("{} UNKNOWN WORDS".format(unks))    
+    
+    embed[2,:] = 0
 
+    # STORE ALL THE DATA   
+    #tokenizer.write("words.dict")
+
+    
     filename = args.filename
 
 

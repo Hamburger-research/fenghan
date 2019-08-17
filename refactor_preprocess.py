@@ -19,6 +19,7 @@ from load_data import preprocess, cross_validation, readh5todata
 from model import LSTMClassifier
 from torch.nn import functional as F
 
+
 # BANTCH_SIZE = 64
 # # BATCH_NUM = int(math.ceil(len(lbl_train[0]) / BANTCH_SIZE))
 # STEP_NUM = 5572       # word length
@@ -78,11 +79,14 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
         start_time = time.time()
         total_train_loss = 0
         
-        for i, data in enumerate(train_loader,0):  # train_loader size is one fold size divided by 23 bantches. 
+        for i, data in enumerate(train_loader,0):  # train_loader size is one fold size divided by 23 batches. 
 
             #Get inputs
             inputs, labels = data
-                
+                       
+            #seq_lengths = LongTensor(length_list)
+            #vectorized_seqs = [movepad for movepad in inputs_numpy  if movepad!=2]
+            #print(vectorized_seqs)
             #if args.cuda > -1:
                 #inputs, labels = inputs.cuda(), labels.cuda() 
             if (inputs.size()[0] is not batch_size):# One of the batch returned by BucketIterator has length different than batch_size 64.
@@ -91,13 +95,10 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
             optimizer.zero_grad()
             
             #Forward pass, backward pass, optimize
+            
+            
             outputs = model(inputs)
-            print("****************")
-            print(labels)
-            print("****************")
-            print("///////////////")
-            print(outputs)
-            print("///////////////")
+            
             loss_size = loss(outputs, labels)
             print(loss_size)
             loss_size.backward()
