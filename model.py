@@ -59,24 +59,24 @@ class LSTMClassifier(nn.Module):
 		input = self.word_embeddings(input_sentence)
 		input = input.permute(1, 0, 2) # input.size() = (num_sequences, batch_size, embedding_length)
 		
-		seq_lengths.sort(reverse = True) 
+		#seq_lengths.sort(reverse = True) 
 		seq_lengths = torch.LongTensor(seq_lengths)
 		print("seq_lengths list in decrease order is:", seq_lengths)
-		packed_input = pack_padded_sequence(input, seq_lengths.numpy(), batch_first=False, enforce_sorted=False)
-        
-		#input = self.word_embeddings(packed_input) # embedded input of shape = (batch_size, num_sequences,  embedding_length)
 		
+		packed_input = pack_padded_sequence(input, seq_lengths.numpy(), batch_first=False, enforce_sorted=False)
+
+		#input = self.word_embeddings(packed_input) # embedded input of shape = (batch_size, num_sequences,  embedding_length)
 		if batch_size is None:
-			h_0 = Variable(torch.zeros(1, self.batch_size, self.hidden_size)) # Initial hidden state of the LSTM
-			c_0 = Variable(torch.zeros(1, self.batch_size, self.hidden_size)) # Initial cell state of the LSTM
+		    h_0 = Variable(torch.zeros(1, self.batch_size, self.hidden_size)) # Initial hidden state of the LSTM
+		    c_0 = Variable(torch.zeros(1, self.batch_size, self.hidden_size)) # Initial cell state of the LSTM
 		else:
 			h_0 = Variable(torch.zeros(1, batch_size, self.hidden_size))
 			c_0 = Variable(torch.zeros(1, batch_size, self.hidden_size))
 		output, (final_hidden_state, final_cell_state) = self.lstm(packed_input, (h_0, c_0))
-        
+
 		final_output = self.label(final_hidden_state[-1]) # final_hidden_state.size() = (1, batch_size, hidden_size) & final_output.size() = (batch_size, output_size)
-	
 		del seq_lengths
+
         
 		return final_output
 

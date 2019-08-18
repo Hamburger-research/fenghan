@@ -159,7 +159,7 @@ def cross_validation(lbl, targets, ids, subj, time, topred, phenotypedict, pheno
 
     train_time = 10
 
-    lbl_biassam = lbl_resample[:,0:5572]    # 插完  
+    lbl_biassam = lbl_resample[:,4:5572]    # 插完  
     lbl_biastar = lbl_resample_target       # 插完  
 
     fold = 10

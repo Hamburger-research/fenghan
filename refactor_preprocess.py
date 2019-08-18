@@ -20,33 +20,19 @@ from model import LSTMClassifier
 from torch.nn import functional as F
 
 
-# BANTCH_SIZE = 64
-# # BATCH_NUM = int(math.ceil(len(lbl_train[0]) / BANTCH_SIZE))
-# STEP_NUM = 5572       # word length
-# EMBEDDING_DIM = 50     # word embedding will be 2 dimension for 2d visualization
-# CLASS_NUM = 1
-# UNITS_NUM = 100
-# PROJECTION_NUM = 64
-# OUTPUT_KEEP_PROB = 0.5
-# LEARNING_RATE = 0.001
-# EPOCHS_NUM = 10
-# args = {}
-
-
-
 
 
 def createLossAndOptimizer(model, arg, learning_rate):
     
     #Loss function
-    loss = torch.nn.CrossEntropyLoss(weight = weight_scale)
-    
+    #criterion = torch.nn.CrossEntropyLoss(weight = weight_scale)
+    criterion = torch.nn.CrossEntropyLoss()
     #Optimizer
     if arg.optimizer == 'Adam':
         optimizer = optim.Adam(model.parameters(), lr= learning_rate)
     elif arg.optimizer == 'Adadelta':
         optimizer = optim.Adadelta(model.parameters(), rho = 0.95, lr= learning_rate)
-    return(loss, optimizer)
+    return(criterion, optimizer)
     
 
 
@@ -56,7 +42,7 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
     import time
     #Print all of the hyperparameters of the training iteration:
     n_batches = len(train_loader)
-    loss, optimizer = createLossAndOptimizer(model, args, learning_rate)
+    criterion, optimizer = createLossAndOptimizer(model, args, learning_rate)
     
     print("===== HYPERPARAMETERS =====")
     print("batch_size=", batch_size)
@@ -99,15 +85,27 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
             
             outputs = model(inputs)
             
-            loss_size = loss(outputs, labels)
-            print(loss_size)
-            loss_size.backward()
-            optimizer.step()
+            print("outputs is: ")
+            print(outputs)            
+
+            loss = criterion(outputs, labels)
             
+            print("loss is: ")
+            print(loss)
+            
+            print("labels is: ")
+            print(labels)           
+
+            
+            loss.backward() # too slow !!!!!!!!!!!!
+            optimizer.step()
             #Print statistics
-            running_loss += loss_size.item()
-            total_train_loss += loss_size.item()
+            running_loss += loss.item()
+            total_train_loss += loss.item()
+            
             model.resetzeropadding()
+            
+            
             #model.l2norm(args)
             #Print every 10th batch of an epoch
             if (i + 1) % (print_every + 1) == 0:
@@ -159,7 +157,7 @@ def main():
     parser.add_argument('-predict_label', type=int, default= phenotypedict["Depression"] , help= 'Choose which type of phenotyping to detect') 
     parser.add_argument('-topred', type=str, default= "Depression" , help= 'Choose which type of phenotyping to detect') 
     parser.add_argument('-epochs', type=int, default=10, help='number of epochs for train [default: 10]')
-    parser.add_argument('-batch_size', type=int, default= 64, help='batch size for training [default: 64]')
+    parser.add_argument('-batch_size', type=int, default= 16, help='batch size for training [default: 64]')
     parser.add_argument('-output_size', type=int, default= 2, help='final output dim [default: 2]')
     parser.add_argument('-hidden_size', type=int, default= 256, help='output dim of the cell [default: 256]')
     parser.add_argument('-embedding_length', type=int, default= 50, help='number of embedding dimension [default: 50]')
@@ -181,12 +179,15 @@ def main():
     weight_scale = [ 1/ (1610 - phenotypedictsamples[phenotypedictinverse[args.predict_label]]), 1/phenotypedictsamples[phenotypedictinverse[args.predict_label]]]
     #weight_scale = [ phenotypedictsamples[phenotypedictinverse[args.predict_label]]/1610*10, (1610 - phenotypedictsamples[phenotypedictinverse[args.predict_label]])/1610*10]
     weight_scale = torch.FloatTensor(weight_scale)
+    
+    print ('Weight Scale is: ',weight_scale)
     # LOAD THE WORD2VEC FILE
     word2vec, emb_size, v_large = load_bin_vec("word2vec_50d.txt") # word2vec whole dataset（label+unlabeled）   470260
     print ('WORD2VEC POINTS:', v_large)
     
     # first step 
     lbl, targets, ids, subj, time, embed = preprocess(args, emb_size, word2vec)
+    
     
     lbl_train, lbl_train_target, lbl_test, lbl_test_target, phenotypedict = cross_validation(lbl, targets, ids, subj, time, args.topred, phenotypedict, phenotypedictsamples)
     
