@@ -93,7 +93,6 @@ def preprocess(args, emb_size, word2vec):
     unks = 0
     
     for key, value in tokenizer.d.items():  #  字典 tokenizer.d:  '<unk>': 1, 'padding': 2, 'Admission': 3, 'Date': 4 ...
-
         try:
              #-1 because of 1 indexing of word2idx (easier with torch)
             embed[value] = word2vec[key]   # 例如： embed[2] <-- word2vec['Admission'] 
@@ -190,18 +189,32 @@ def cross_validation(lbl, targets, ids, subj, time, topred, phenotypedict, pheno
 
 def readh5todata(args,path):
     myFile = h5py.File(path, 'r')
-    x_train = torch.LongTensor(myFile['train'][...])
-    y_train = myFile['train_label'][...]
-   # y_train = y_train[:,0]
+    x_train = myFile['train'][...]
+    seq_lengths_xtrain = []
+    for item in x_train:
+        current_sample_removedpad = [movepad for movepad in item if movepad!=2]
+        seq_lengths_xtrain.append(len(current_sample_removedpad))
     
+    y_train = myFile['train_label'][...]
+    # y_train = y_train[:,0]
+	#seq_lengths.sort(reverse = True) 
+    x_train = torch.LongTensor(x_train)
     y_train = torch.LongTensor(y_train)
-    train = data_utils.TensorDataset(x_train, y_train)
+    seq_lengths_xtrain = torch.LongTensor(seq_lengths_xtrain)
+    train = data_utils.TensorDataset(x_train,seq_lengths_xtrain, y_train)
     #y_train = torch.tensor(y_train)
-    x_test = torch.LongTensor(myFile['test'][...])
+    x_test = myFile['test'][...]
+    seq_lengths_xtest = []
+    for item in x_test:
+        current_sample_removedpad = [movepad for movepad in item if movepad!=2]
+        seq_lengths_xtest.append(len(current_sample_removedpad))
+    
     y_test = myFile['test_label'][...]
   #  y_test = y_test[:,0]
+    x_test = torch.LongTensor(x_test)
     y_test = torch.LongTensor(y_test)
-    test = data_utils.TensorDataset(x_test, y_test)
+    seq_lengths_xtest = torch.LongTensor(seq_lengths_xtest)
+    test = data_utils.TensorDataset(x_test,seq_lengths_xtest, y_test)
     #y_test = y_test
     w2v = myFile['w2v'][...]
     #w2v = np.row_stack((np.zeros(50),w2v))

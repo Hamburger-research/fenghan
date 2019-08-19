@@ -18,7 +18,8 @@ from load_data import preprocess, cross_validation, readh5todata
 
 from model import LSTMClassifier
 from torch.nn import functional as F
-
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import accuracy_score
 
 
 
@@ -57,8 +58,8 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
     
     #Loop for n_epochs
     for epoch in range(n_epochs):
-        #if args.cuda > -1:
-            #net.cuda()
+        if args.cuda > -1:                                                                                                         
+            model.cuda()
         model.train()
         running_loss = 0.0
         print_every = n_batches // 10    # 2
@@ -68,13 +69,13 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
         for i, data in enumerate(train_loader,0):  # train_loader size is one fold size divided by 23 batches. 
 
             #Get inputs
-            inputs, labels = data
+            inputs,sequence, labels = data
                        
             #seq_lengths = LongTensor(length_list)
             #vectorized_seqs = [movepad for movepad in inputs_numpy  if movepad!=2]
             #print(vectorized_seqs)
-            #if args.cuda > -1:
-                #inputs, labels = inputs.cuda(), labels.cuda() 
+            if args.cuda > -1:
+                inputs, sequence, labels = inputs.cuda(), sequence.cuda(), labels.cuda() 
             if (inputs.size()[0] is not batch_size):# One of the batch returned by BucketIterator has length different than batch_size 64.
                 continue
             #Set the parameter gradients to zero
@@ -82,21 +83,20 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
             
             #Forward pass, backward pass, optimize
             
+            outputs = model(inputs,sequence)
             
-            outputs = model(inputs)
-            
-            print("outputs is: ")
-            print(outputs)            
-
-            loss = criterion(outputs, labels)
-            
-            print("loss is: ")
-            print(loss)
-            
-            print("labels is: ")
-            print(labels)           
-
-            
+            if args.debug == 1:
+                print("outputs is: ")
+                print(outputs)            
+    
+                loss = criterion(outputs, labels)
+                
+                print("loss is: ")
+                print(loss)
+                
+                print("labels is: ")
+                print(labels)           
+            loss = criterion(outputs,labels)
             loss.backward() # too slow !!!!!!!!!!!!
             optimizer.step()
             #Print statistics
@@ -104,7 +104,7 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
             total_train_loss += loss.item()
             
             model.resetzeropadding()
-            
+            model.l2norm(args)
             
             #model.l2norm(args)
             #Print every 10th batch of an epoch
@@ -118,16 +118,16 @@ def train_model(args, model, learning_rate, batch_size, n_epochs, train_loader):
     print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
     
     
-def predict(args,net):
+def predict(args,net,test_loader):
     
     net.eval()
     with torch.no_grad(): 
         return_predict = torch.tensor([])
         for i, data in enumerate(test_loader,0):
-            inputs, labels = data
+            inputs,sequence, labels = data
             if args.cuda > -1:
-                inputs, labels = inputs.cuda(), labels.cuda() 
-            output = net(inputs)
+                inputs, sequence,labels = inputs.cuda(), sequence.cuda(), labels.cuda() 
+            output = net(inputs,sequence)
             _, predicted = torch.max(output, 1)
             if i == 0:
                 return_predict = predicted
@@ -157,15 +157,16 @@ def main():
     parser.add_argument('-predict_label', type=int, default= phenotypedict["Depression"] , help= 'Choose which type of phenotyping to detect') 
     parser.add_argument('-topred', type=str, default= "Depression" , help= 'Choose which type of phenotyping to detect') 
     parser.add_argument('-epochs', type=int, default=10, help='number of epochs for train [default: 10]')
-    parser.add_argument('-batch_size', type=int, default= 16, help='batch size for training [default: 64]')
+    parser.add_argument('-batch_size', type=int, default= 8, help='batch size for training [default: 64]')
     parser.add_argument('-output_size', type=int, default= 2, help='final output dim [default: 2]')
     parser.add_argument('-hidden_size', type=int, default= 256, help='output dim of the cell [default: 256]')
     parser.add_argument('-embedding_length', type=int, default= 50, help='number of embedding dimension [default: 50]')
-    parser.add_argument('-learning_rate', type=float, default=0.001, help='initial learning rate [default: 0.5]')   
+    parser.add_argument('-learning_rate', type=float, default=0.005, help='initial learning rate [default: 0.5]')   
     parser.add_argument('-vocab_size', type=float, default=48849, help='initial learning rate [default: 0.5]')   
     parser.add_argument('-optimizer', type=str, default='Adam', help='optimizer for the gradient descent: Adadelta, Adam')
-
-    
+    parser.add_argument('-cuda', type=int, default= -1, help='CUUUUUUUUUUUUDA')
+    parser.add_argument('-debug', type=int, default= 0, help='debug mode to print')
+    parser.add_argument('-l2s', type=float, default=3, help='l2 norm')
     #    with open("conditions.dict", 'w') as f:
     #        for i, c in enumerate(conditions):
     #            print (f, i + 1, c)
@@ -176,9 +177,11 @@ def main():
     phenotypedictinverse = dict({11:"Cancer",4:"Heart",5:"Lung",10:"Neuro",9:"Pain",7:"Alcohol",8:"Substance",1:"Obesity",6:"Disorders",12:"Depression"})
     phenotypedictsamples = dict({"Cancer":161,"Heart":275,"Lung":167,"Neuro":368,"Pain":321,"Alcohol":196,"Substance":155,"Obesity":126,"Disorders":295,"Depression":460})
   
-    weight_scale = [ 1/ (1610 - phenotypedictsamples[phenotypedictinverse[args.predict_label]]), 1/phenotypedictsamples[phenotypedictinverse[args.predict_label]]]
+    weight_scale = [ 1 / (1610 - phenotypedictsamples[phenotypedictinverse[args.predict_label]]),
+                     1 / phenotypedictsamples[phenotypedictinverse[args.predict_label]]]
     #weight_scale = [ phenotypedictsamples[phenotypedictinverse[args.predict_label]]/1610*10, (1610 - phenotypedictsamples[phenotypedictinverse[args.predict_label]])/1610*10]
-    weight_scale = torch.FloatTensor(weight_scale)
+    if args.cuda > -1:
+        weight_scale = torch.FloatTensor(weight_scale).cuda()
     
     print ('Weight Scale is: ',weight_scale)
     # LOAD THE WORD2VEC FILE
@@ -186,14 +189,15 @@ def main():
     print ('WORD2VEC POINTS:', v_large)
     
     # first step 
-    lbl, targets, ids, subj, time, embed = preprocess(args, emb_size, word2vec)
+#    lbl, targets, ids, subj, time, embed = preprocess(args, emb_size, word2vec)
     
     
-    lbl_train, lbl_train_target, lbl_test, lbl_test_target, phenotypedict = cross_validation(lbl, targets, ids, subj, time, args.topred, phenotypedict, phenotypedictsamples)
+#    lbl_train, lbl_train_target, lbl_test, lbl_test_target, phenotypedict = cross_validation(lbl, targets, ids, subj, time, args.topred, phenotypedict, phenotypedictsamples)
     
-    fold = 10
-        
+    fold = 1
+    
     # put data of  each fold in to a .h5py file
+    '''
     for i in range(0,fold):  
          with h5py.File('data_biased_'+args.topred+'_cv{0}_occ'.format(i+1) + '0'+'.h5',"w") as f:
              xtrain = np.array(lbl_train[i], dtype=int)
@@ -205,9 +209,12 @@ def main():
              f['train_label'] = xtraintarget[:,phenotypedict[args.topred]]
              f['test'] = xtest
              f['test_label'] = xtesttarget[:,phenotypedict[args.topred]]    
-    
+    '''
+    if args.cuda > -1:
+        torch.cuda.set_device(args.cuda)
+        torch.backends.cudnn.benchmark =True
     for i in range(0,fold):
-        #torch.cuda.set_device(args.cuda)
+
         train,test,y_test,w2v = readh5todata(args,'data_biased_'+ phenotypedictinverse[args.predict_label] + '_cv{0}'.format(i+1) + '_occ' + '0' +'.h5')
         args.w2v = w2v
         train_loader = torch.utils.data.DataLoader(train, batch_size=args.batch_size, sampler=None,shuffle = False)
@@ -215,8 +222,9 @@ def main():
         LSTM = LSTMClassifier(args)
         print(LSTM)
         train_model(args, LSTM, args.learning_rate, args.batch_size, args.epochs, train_loader)
-        
-        
+#        predicted = predict(args,LSTM,test_loader)
+#        scores = precision_recall_fscore_support(y_test.numpy(),predicted.detach().cpu().numpy(),pos_label  = 1, average = 'binary')
+#        acc_score = accuracy_score(y_test.numpy(),predicted.detach().cpu().numpy())
     
     
    # print('Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Val. Loss: {val_loss:3f}, Val. Acc: {val_acc:.2f}%')
